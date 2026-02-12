@@ -1,0 +1,35 @@
+{
+  "name": "tutorial-md-hybrid",
+  "version": "1.0.0",
+  "description": "Hybrid WhatsApp & Telegram Bot Deployment Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "prod": "pm2 start index.js --name 'tutorial-md'"
+  },
+  "keywords": [
+    "whatsapp",
+    "telegram",
+    "bot",
+    "baileys",
+    "multi-device"
+  ],
+  "author": "Minato",
+  "license": "ISC",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "chalk": "^4.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "fs-extra": "^11.2.0",
+    "node-telegram-bot-api": "^0.64.0",
+    "pino": "^8.19.0",
+    "pm2": "^5.3.1",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
