@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bot Control Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #25D366;
+            --dark: #020406;
+            --glass: rgba(255,255,255,0.07);
+            --border: rgba(255,255,255,0.15);
+            --text: #e9edef;
+            --neon: 0 0 25px rgba(37,211,102,0.5);
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            color: var(--text);
+            height: 100vh;
+            background: radial-gradient(circle at top, #0f2430, #010203);
+            overflow-x: hidden; /* Changed from hidden to allow vertical scroll if needed */
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* 📂 Sidebar */
+        .sidebar {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            transition: 0.3s ease;
+            z-index: 1001;
+        }
+
+        .sidebar h2 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .menu-item {
+            padding: 12px 14px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover {
+            background: rgba(37,211,102,0.15);
+            box-shadow: var(--neon);
+            color: var(--primary);
+        }
+
+        /* 🖥️ Main Area */
+        .main {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* 🧊 Cards */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: 0.3s;
+        }
+
+        .bot-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-box h3 {
+            margin: 5px 0 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        /* 🪟 Pairing Box */
+        .pairing-box {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logo-box {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 20px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--neon);
+        }
+
+        .logo-box i { font-size: 2.5rem; color: var(--primary); }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            text-align: center;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #25D366, #1fa855);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--neon);
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        button:hover { transform: scale(1.02); brightness: 1.1; }
+
+        #pairing-section {
+            display: none;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .code-text {
+            font-size: 2rem;
+            letter-spacing: 8px;
+            font-weight: 900;
+            color: var(--primary);
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 10px;
+            border: 1px solid var(--primary);
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100%;
+                width: 260px;
+            }
+            .sidebar.active { left: 0; }
+            .hamburger { display: block; }
+            .bot-panel { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="sidebar" id="sidebar">
+        <h2>🤖 AI Panel</h2>
+        <div class="menu-item"><i class="fas fa-plug"></i> Pairing Center</div>
+        <div class="menu-item"><i class="fas fa-robot"></i> Bot Status</div>
+        <div class="menu-item"><i class="fas fa-server"></i> Server Logs</div>
+        <div class="menu-item" onclick="location.reload()"><i class="fas fa-sync"></i> Refresh</div>
+    </div>
+
+    <div class="main">
+        <div class="top-bar">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </div>
+            <h2 style="font-size: 1.2rem;">🚀 Deployment Dashboard</h2>
+            <div class="server-status">
+                <div class="status-dot"></div> Server Online
+            </div>
+        </div>
+
+        <div class="bot-panel">
+            <div class="stat-box">Active Bots<h3 id="bots">0</h3></div>
+            <div class="stat-box">Users<h3 id="users">0</h3></div>
+            <div class="stat-box">Uptime<h3 id="uptime">0%</h3></div>
+        </div>
+
+        <div class="card pairing-box">
+            <div class="logo-box"><i class="fab fa-whatsapp"></i></div>
+            <h3>WhatsApp Pairing</h3>
+            <p style="color:#9fb0ba; font-size: 0.9rem;">Include country code (e.g., 263...)</p>
+
+            <input type="text" id="phone" placeholder="Enter phone number">
+
+            <button id="mainBtn" onclick="generatePairingCode()">
+                <span id="btnText">Generate Pairing Code</span>
+            </button>
+
+            <div id="loader" class="loading-spinner"></div>
+
+            <div id="pairing-section">
+                <p style="margin-bottom: 5px;">Your Pairing Code:</p>
+                <div class="code-text" id="pairing-code">--------</div>
+                <p style="font-size: 0.8rem; color: #8696a0; margin-top: 15px;">
+                    Open WhatsApp > Linked Devices > Link with Phone Number
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const hamburger = document.querySelector('.hamburger');
+    if (window.innerWidth <= 900 && !sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+        sidebar.classList.remove('active');
+    }
+});
+
+async function loadStats() {
+    try {
+        const res = await fetch("http://localhost:3000/stats");
+        const data = await res.json();
+        document.getElementById("bots").innerText = data.bots || 0;
+        document.getElementById("users").innerText = data.users || 0;
+        document.getElementById("uptime").innerText = data.uptime || "100%";
+    } catch (err) {
+        console.log("Stats offline");
+    }
+}
+loadStats();
+setInterval(loadStats, 10000);
+
+async function generatePairingCode() {
+    const phoneInput = document.getElementById('phone');
+    const btnText = document.getElementById('btnText');
+    const loader = document.getElementById('loader');
+    const pairingSection = document.getElementById('pairing-section');
+    const codeDisplay = document.getElementById('pairing-code');
+
+    // Clean number: remove +, spaces, dashes
+    const phone = phoneInput.value.replace(/\D/g, '');
+
+    if(!phone || phone.length < 10) {
+        return alert("Please enter a valid phone number with country code.");
+    }
+
+    btnText.style.display = 'none';
+    loader.style.display = 'block';
+    pairingSection.style.display = 'none';
+
+    try {
+        // Updated to use the correct query parameter name 'number' as per your load script
+        const response = await fetch(`http://localhost:3000/pairing?number=${phone}`);
+        
+        if (!response.ok) throw new Error("Server error");
+        
+        const data = await response.json();
+
+        if(data.code) {
+            codeDisplay.innerText = data.code;
+            pairingSection.style.display = 'block';
+        } else {
+            alert(data.message || "Failed to generate code. Try again.");
+        }
+    } catch (error) {
+        alert("Cannot reach the deployment server. Ensure it is running on port 3000.");
+    } finally {
+        btnText.style.display = 'block';
+        loader.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html>
