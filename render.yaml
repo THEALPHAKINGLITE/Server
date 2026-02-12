@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: tutorial-md-server
+    env: node
+    plan: starter # Persistence requires a paid plan on Render
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: TELEGRAM_TOKEN
+        sync: false # Set this in the Render Dashboard
+      - key: PORT
+        value: 3000
+    mounts:
+      - path: /opt/render/project/src/sessions
+        name: bot-sessions
+
+disks:
+  - name: bot-sessions
+    mountPath: /opt/render/project/src/sessions
+    sizeGB: 1
